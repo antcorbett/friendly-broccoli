@@ -55,8 +55,10 @@ async function handleAddCharge() {
   setError("");
   const amountInput = document.getElementById("amountInput");
   const paidBySelect = document.getElementById("paidBySelect");
+  const descriptionInput = document.getElementById("descriptionInput");
   const amount = parseFloat(amountInput.value);
   const paidBy = paidBySelect.value;
+  const description = descriptionInput.value.trim();
   const splitBetween = getSelectedSplit();
 
   if (!amount || amount <= 0) {
@@ -90,6 +92,7 @@ async function handleAddCharge() {
       vat,
       total,
       paidBy,
+      description,
       splitBetween,
       perPersonCost,
       createdAt: new Date().toISOString(),
@@ -98,6 +101,7 @@ async function handleAddCharge() {
 
     amountInput.value = "";
     paidBySelect.value = "";
+    descriptionInput.value = "";
     document.querySelectorAll("#splitGrid input:checked").forEach(cb => cb.checked = false);
     updateVatPreview();
   } catch (err) {
@@ -183,11 +187,16 @@ function renderHistory() {
       `<span>${p}: ${fmt(c.perPersonCost)}</span>`
     ).join("");
 
+    const descHtml = c.description
+      ? `<div class="tx-desc">${c.description}</div>`
+      : "";
+
     const el = document.createElement("div");
     el.className = "tx";
     el.innerHTML = `
       <div class="tx-top">
         <div>
+          ${descHtml}
           <div class="amount">${fmt(c.total)} <span style="color:var(--muted); font-weight:400; font-size:12px;">(incl. $${c.vat.toFixed(2)} VAT)</span></div>
           <div class="tx-meta">${dateStr} &middot; Paid by <b>${c.paidBy}</b></div>
         </div>

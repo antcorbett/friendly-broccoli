@@ -95,7 +95,7 @@ section h2 {
   margin-bottom: 6px;
 }
 
-input[type="number"], select {
+input[type="number"], input[type="text"], select {
   width: 100%;
   padding: 12px;
   font-size: 17px;
@@ -273,6 +273,12 @@ button {
 .tx-top .amount {
   font-weight: 700;
   font-size: 16px;
+}
+
+.tx-desc {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .tx-meta {
