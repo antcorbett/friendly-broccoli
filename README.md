@@ -33,5 +33,6 @@ Then open http://localhost:8080. Note: browser geolocation requires `https://` o
 ## Notes / limitations
 
 - **Turn-by-turn on your Watch/AirPods is handled by Apple Maps or Google Maps, not this site.** A website can't control your Watch or push audio directly. This app's job is to build a good random route and open it in the native app, which already supports background/locked-screen navigation with Watch and AirPods.
-- Apple Maps doesn't officially support deep-linking straight into cycling directions, so for cycling the app opens Apple Maps without forcing a mode — you may need to tap "Cycle" yourself. Google Maps handles this properly via `travelmode=bicycling`.
+- **Google Maps can follow the full generated loop** (out and back to your start point) because its `waypoints` URL parameter officially supports multi-stop routes.
+- **Apple Maps cannot** — it has no documented/working way to deep-link a multi-stop route, so the "Open in Apple Maps" button only sends it a single destination: the farthest point on the loop. You'll walk/ride out along Apple's own route to that point, then need to retrace your steps back (or ask Apple Maps for directions home from there). It also doesn't reliably support forcing cycling mode via URL, so for rides you may need to tap "Cycle" yourself once it opens.
 - Route "favouring footpaths / quiet roads" comes from OpenRouteService's `foot-walking` and `cycling-regular` routing profiles, which already weight OSM footways/cycleways over busy roads, plus `avoid_features: steps` for walking.

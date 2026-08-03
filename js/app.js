@@ -257,11 +257,35 @@ function sampleWaypoints(latLngs, maxPoints) {
   return sampled;
 }
 
+function haversineMeters([lat1, lng1], [lat2, lng2]) {
+  const R = 6371000;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function farthestPoint(latLngs, from) {
+  let best = latLngs[0];
+  let bestDist = -1;
+  for (const point of latLngs) {
+    const dist = haversineMeters(from, point);
+    if (dist > bestDist) {
+      bestDist = dist;
+      best = point;
+    }
+  }
+  return best;
+}
+
 function buildNavLinks(latLngs) {
   const start = latLngs[0];
   const waypoints = sampleWaypoints(latLngs, 8);
   const isCycle = state.mode === 'cycle';
 
+  // Google Maps' `waypoints` param officially supports multi-stop routes, so it can draw the full loop.
   const googleWaypoints = waypoints.map(([lat, lng]) => `${lat},${lng}`).join('|');
   const googleUrl =
     `https://www.google.com/maps/dir/?api=1` +
@@ -270,15 +294,16 @@ function buildNavLinks(latLngs) {
     (googleWaypoints ? `&waypoints=${encodeURIComponent(googleWaypoints)}` : '') +
     `&travelmode=${isCycle ? 'bicycling' : 'walking'}`;
 
-  const appleStops = [...waypoints, start].map(([lat, lng]) => `${lat},${lng}`).join('+to:');
+  // Apple Maps has no documented multi-stop URL support, so send it a single real destination
+  // (the farthest point on the loop) rather than a broken chained-stops hack.
+  const turnaround = farthestPoint(latLngs, start);
   const appleUrl =
     `https://maps.apple.com/?saddr=${start[0]},${start[1]}` +
-    `&daddr=${appleStops}` +
+    `&daddr=${turnaround[0]},${turnaround[1]}` +
     (isCycle ? '' : '&dirflg=w');
 
   el('googleMapsLink').href = googleUrl;
   el('appleMapsLink').href = appleUrl;
-  el('cycleAppleNote').classList.toggle('hidden', !isCycle);
 }
 
 function init() {
